@@ -1,5 +1,7 @@
 import tiktoken
+import os 
 
+from dotenv import load_dotenv
 from pathlib import Path
 
 CHUNCK_SIZE = 400
@@ -7,9 +9,10 @@ CHUNCK_OVERLAP = 50
 
 
 def chunck() :
+    load_dotenv()
     # Data Folder
     data_folder_path = Path("data")
-    encoder = tiktoken.encoding_for_model("text-embedding-3-small")
+    encoder = tiktoken.encoding_for_model(os.getenv("MODEL"))
 
     chuncks = []
     #Iterate over each data file
@@ -31,7 +34,7 @@ def chunck() :
     return chuncks
 
 chuncks_for_data = chunck()
-print(len(chuncks_for_data))
+# print(len(chuncks_for_data))
 
 
 
