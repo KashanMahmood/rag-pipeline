@@ -33,8 +33,6 @@ def chunck() :
                 chuncks.append({"text" : decoded_chuck, "file_path" : file_path.name})
     return chuncks
 
-chuncks_for_data = chunck()
-# print(len(chuncks_for_data))
 
 
 
