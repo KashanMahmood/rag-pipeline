@@ -1,0 +1,26 @@
+Choosing your node size
+
+The node size you select for your ElastiCache cluster impacts costs, performance, and fault tolerance.
+
+Key questions to determine your minimum node type for Valkey or Redis OSS:
+
+Do you expect throughput-bound workloads with multiple client connections?
+If so and you're running Redis OSS version 5.0.6 or higher, you can get better throughput and latency with the enhanced I/O feature, where available CPUs are used for offloading the client connections on behalf of the Redis OSS engine. If you're running Redis OSS version 7.0.4 or higher, you will get additional acceleration with enhanced I/O multiplexing, where each dedicated network IO thread pipelines commands from multiple clients into the Redis OSS engine.
+
+Do you have workloads that access a small percentage of their data regularly?
+If so and you are running on Redis OSS engine version 6.2 or later, you can leverage data tiering by choosing the r6gd node type. With data tiering, least-recently used data is stored in SSD. When it is retrieved there is a small latency cost, which is balanced by cost savings.
+
+How much total memory do you need for your data?
+To get a general estimate, take the size of the items that you want to cache. Multiply this size by the number of items that you want to keep in the cache at the same time. Then divide this over the number of shards in your cluster.
+
+How write-heavy is your application?
+Write heavy applications can require significantly more available memory when taking snapshots or failing over. Whenever the BGSAVE process is performed, you must have sufficient memory that is unused by data to accommodate all the writes that transpire during the BGSAVE process. The worst case is when all of your data is rewritten during the process. In this case, you need a node instance size with twice as much memory as needed for data alone.
+
+Sizing for cluster mode disabled:
+If you're implementing a Valkey or Redis OSS (cluster mode disabled) cluster, your node type must be able to accommodate all your data plus the necessary overhead. For example, if your total data is 12 GB, you can use a cache.m3.xlarge node with 13.3 GB of memory. But if write-heavy, double to at least 24 GB.
+
+Sizing for cluster mode enabled with multiple shards:
+The node type must accommodate bytes-for-data-and-overhead / number-of-shards bytes of data. For example, 12 GB total with 2 shards means each node needs about 6 GB. If write-heavy, double to 12 GB per shard.
+
+Monitoring and adjusting:
+While your cluster is running, monitor the memory usage, processor utilization, cache hits, and cache misses metrics published to CloudWatch. When monitoring CPU usage, remember Valkey and Redis OSS are single-threaded. Multiply the reported CPU usage by the number of CPU cores to get actual usage. For example, a four-core CPU reporting 20 percent usage rate is actually the one core Redis OSS is running at 80 percent utilization.

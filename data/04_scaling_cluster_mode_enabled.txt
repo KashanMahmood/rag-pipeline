@@ -1,0 +1,35 @@
+Scaling Valkey or Redis OSS (Cluster Mode Enabled) clusters
+
+As demand on your clusters changes, you might decide to improve performance or reduce costs by changing the number of shards in your Valkey or Redis OSS (cluster mode enabled) cluster. We recommend using online horizontal scaling to do so, because it allows your cluster to continue serving requests during the scaling process.
+
+Conditions under which you might decide to rescale your cluster include the following:
+
+Memory pressure: If the nodes in your cluster are under memory pressure, you might decide to scale out so that you have more resources to better store data and serve requests. You can determine whether your nodes are under memory pressure by monitoring the following metrics: FreeableMemory, SwapUsage, and BytesUsedForCache.
+
+CPU or network bottleneck: If latency/throughput issues are plaguing your cluster, you might need to scale out to resolve the issues. You can monitor your latency and throughput levels by monitoring the following metrics: CPUUtilization, NetworkBytesIn, NetworkBytesOut, CurrConnections, and NewConnections.
+
+Your cluster is over-scaled: Current demand on your cluster is such that scaling in doesn't hurt performance and reduces your costs. You can monitor your cluster's use to determine whether or not you can safely scale in using the following metrics: FreeableMemory, SwapUsage, BytesUsedForCache, CPUUtilization, NetworkBytesIn, NetworkBytesOut, CurrConnections, and NewConnections.
+
+Performance Impact of Scaling
+
+When you scale using the offline process, your cluster is offline for a significant portion of the process and thus unable to serve requests. When you scale using the online method, because scaling is a compute-intensive operation, there is some degradation in performance, nevertheless, your cluster continues to serve requests throughout the scaling operation.
+
+There are two ways to scale your Valkey or Redis OSS (cluster mode enabled) cluster: horizontal and vertical scaling.
+
+Horizontal scaling allows you to change the number of node groups (shards) in the replication group by adding or removing node groups (shards). The online resharding process allows scaling in/out while the cluster continues serving incoming requests.
+
+Vertical Scaling changes the node type to resize the cluster. The online vertical scaling allows scaling up/down while the cluster continues serving incoming requests.
+
+Online resharding
+
+By using online resharding and shard rebalancing with ElastiCache Valkey 7.2 or newer, or Redis OSS version 3.2.10 or newer, you can scale your cluster dynamically with no downtime.
+
+You can do the following:
+- Scale out: Increase read and write capacity by adding shards to your cluster.
+- Scale in: Reduce read and write capacity, and thereby costs, by removing shards from your cluster.
+- Rebalance: Move the keyspaces among the shards so they are as equally distributed as possible.
+
+Limitations:
+- These processes require Valkey 7.2 and newer or Redis OSS 3.2.10 or newer.
+- If any of the keys in a shard contain a large item, that key isn't migrated to a new shard when scaling out or rebalancing.
+- If any of the keys in a shard contain a large item (items greater than 256 MB after serialization), that shard isn't deleted when scaling in.

@@ -1,0 +1,25 @@
+Snapshot and restore
+
+Amazon ElastiCache caches running Valkey, Redis OSS, or Serverless Memcached can back up their data by creating a snapshot. You can use the backup to restore a cache or seed data to a new cache. The backup consists of the cache's metadata, along with all of the data in the cache. All backups are written to Amazon Simple Storage Service (Amazon S3), which provides durable storage. At any time, you can restore your data by creating a new Valkey, Redis OSS, or Serverless Memcached cache and populating it with data from a backup.
+
+If you plan to delete a cache and it's important to preserve the data, you can take an extra precaution. Create a manual backup first, verify that its status is available, and then delete the cache.
+
+Backup constraints
+
+- Backup and restore are supported only for caches running on Valkey, Redis OSS or Serverless Memcached.
+- For Valkey or Redis OSS (cluster mode disabled) clusters, backup and restore aren't supported on cache.t1.micro nodes. All other cache node types are supported.
+- For Valkey or Redis OSS (cluster mode enabled) clusters, backup and restore are supported for all node types.
+- During any contiguous 24-hour period, you can create no more than 24 manual backups per serverless cache. For Valkey and Redis OSS node-based clusters, you can create no more than 20 manual backups per node in the cluster.
+- Valkey or Redis OSS (cluster mode enabled) only supports taking backups on the cluster level (for the API or CLI, the replication group level). It doesn't support taking backups at the shard level.
+- During the backup process, you can't run any other API or CLI operations on serverless cache.
+- If you are using Valkey or Redis OSS caches with data tiering, you cannot export a backup to Amazon S3.
+
+Performance impact of backups of node-based clusters
+
+Backups on serverless caches are transparent to the application with no performance impact. However, when creating backups for node-based clusters, there can be some performance impact depending on the available reserved memory.
+
+Guidelines for improving backup performance for node-based clusters:
+
+Set the reserved-memory-percent parameter: To mitigate excessive paging, set the reserved-memory-percent parameter. This parameter prevents Valkey and Redis OSS from consuming all of the node's available memory, and can help reduce the amount of paging.
+
+Create backups from a read replica: If you are running Valkey or Redis OSS in a node group with more than one node, you can take a backup from the primary node or one of the read replicas. Because of the system resources required during BGSAVE, we recommend that you create backups from one of the read replicas. While the backup is being created from the replica, the primary node remains unaffected by BGSAVE resource requirements.

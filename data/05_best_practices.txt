@@ -1,0 +1,25 @@
+ElastiCache best practices and caching strategies
+
+Below you can find recommended best practices for Amazon ElastiCache. Following these improves your cache's performance and reliability.
+
+Topics covered:
+- Overall best practices
+- Best Practices for using Read Replicas
+- Supported and restricted Valkey, Memcached, and Redis OSS commands
+- Valkey and Redis OSS configuration and limits
+- IPv6 client examples for Valkey, Memcached, and Redis OSS
+- Best practices for clients (Valkey and Redis OSS)
+- Best practices for clients (Memcached)
+- TLS enabled dual stack ElastiCache clusters
+- Managing reserved memory for Valkey and Redis OSS
+- Best practices when working with Valkey and Redis OSS node-based clusters
+- Caching database query results
+- Caching strategies for Memcached
+
+TLS enabled dual stack ElastiCache clusters
+
+When TLS is enabled for ElastiCache clusters the cluster discovery functions (cluster slots, cluster shards, and cluster nodes for Redis) or config get cluster for Memcached return hostnames instead of IPs. The hostnames are then used instead of IPs to connect to the ElastiCache cluster and perform a TLS handshake. This means that clients won't be affected by the IP Discovery parameter. For TLS enabled clusters the IP Discovery parameter has no effect on the preferred IP protocol. Instead, the IP protocol used will be determined by which IP protocol the client prefers when resolving DNS hostnames.
+
+Java clients: When connecting from a Java environment that supports both IPv4 and IPv6, Java will by default prefer IPv4 over IPv6 for backwards compatibility. The IP protocol preference is configurable through the JVM arguments. To prefer IPv4, the JVM accepts -Djava.net.preferIPv4Stack=true and to prefer IPv6 set -Djava.net.preferIPv6Stack=true.
+
+Host Level Preferences: In general, if the client or client runtime don't provide configuration options for setting an IP protocol preference, when performing DNS resolution, the IP protocol will depend on the host's configuration. By default, most hosts prefer IPv6 over IPv4 but this preference can be configured at the host level.

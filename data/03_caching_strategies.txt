@@ -1,0 +1,43 @@
+Caching strategies
+
+What strategies to implement for populating and maintaining your cache depend upon what data you cache and the access patterns to that data. For example, you likely don't want to use the same strategy for both a top-10 leaderboard on a gaming site and trending news stories.
+
+Lazy loading
+
+Lazy loading is a caching strategy that loads data into the cache only when necessary. Amazon ElastiCache is an in-memory key-value store that sits between your application and the data store (database) that it accesses. Whenever your application requests data, it first makes the request to the ElastiCache cache. If the data exists in the cache and is current, ElastiCache returns the data to your application. If the data doesn't exist in the cache or has expired, your application requests the data from your data store. Your data store then returns the data to your application. Your application next writes the data received from the store to the cache so it can be more quickly retrieved the next time it's requested.
+
+A cache hit occurs when data is in the cache and isn't expired:
+1. Your application requests data from the cache.
+2. The cache returns the data to the application.
+
+A cache miss occurs when data isn't in the cache or is expired:
+1. Your application requests data from the cache.
+2. The cache doesn't have the requested data, so returns a null.
+3. Your application requests and receives the data from the database.
+4. Your application updates the cache with the new data.
+
+Advantages of lazy loading:
+- Only requested data is cached. Because most data is never requested, lazy loading avoids filling up the cache with data that isn't requested.
+- Node failures aren't fatal for your application. When a node fails and is replaced by a new, empty node, your application continues to function, though with increased latency.
+
+Disadvantages of lazy loading:
+- There is a cache miss penalty. Each cache miss results in three trips: initial request for data from the cache, query of the database for the data, writing the data to the cache.
+- Stale data. If data is written to the cache only when there is a cache miss, data in the cache can become stale because there are no updates to the cache when data is changed in the database.
+
+Write-through
+
+The write-through strategy adds data or updates data in the cache whenever data is written to the database.
+
+Advantages of write-through:
+- Data in the cache is never stale. Because the data in the cache is updated every time it's written to the database, the data in the cache is always current.
+- Write penalty vs. read penalty. Every write involves two trips: a write to the cache and a write to the database. End users are generally more tolerant of latency when updating data than when retrieving data.
+
+Disadvantages of write-through:
+- Missing data. If you spin up a new node, whether due to a node failure or scaling out, there is missing data until it's added or updated on the database.
+- Cache churn. Most data is never read, which is a waste of resources.
+
+Adding TTL
+
+Time to live (TTL) is an integer value that specifies the number of seconds until the key expires. When an application attempts to read an expired key, it is treated as though the key is not found. The database is queried for the key and the cache is updated. This approach doesn't guarantee that a value isn't stale. However, it keeps data from getting too stale and requires that values in the cache are occasionally refreshed from the database.
+
+By adding a TTL value to each write, you can have the advantages of each strategy while largely avoiding cluttering up the cache with extra data.

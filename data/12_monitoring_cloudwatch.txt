@@ -1,0 +1,50 @@
+Monitoring use with CloudWatch Metrics
+
+ElastiCache provides metrics that enable you to monitor your clusters. You can access these metrics through CloudWatch. ElastiCache provides both host-level metrics (for example, CPU usage) and metrics that are specific to the cache engine software (for example, cache gets and cache misses). These metrics are measured and published for each Cache node in 60-second intervals.
+
+You should consider setting CloudWatch alarms on certain key metrics, so that you will be notified if your cluster's performance starts to degrade.
+
+Topics:
+- Host-Level Metrics
+- Metrics for Valkey and Redis OSS
+- Metrics for Memcached
+- Which Metrics Should I Monitor?
+- Choosing Metric Statistics and Periods
+- Monitoring CloudWatch Cluster and Node Metrics
+
+Key host-level metrics to monitor:
+
+CPUUtilization: The percentage of CPU utilization for the entire host. Because Redis is single-threaded, we recommend you monitor EngineCPUUtilization metric for nodes with 4 or more vCPUs.
+
+FreeableMemory: The amount of free memory available on the host. This is derived from the RAM, buffers, and cache that the OS reports as freeable.
+
+SwapUsage: The amount of swap used on the host. Should be near zero for healthy operation.
+
+NetworkBytesIn/NetworkBytesOut: The number of bytes the host has read from/written to the network. Useful for identifying network bottlenecks.
+
+Key Redis-specific metrics:
+
+CurrConnections: The number of client connections, excluding connections from read replicas.
+
+EngineCPUUtilization: Provides CPU utilization of the Redis engine thread. Since Redis is single-threaded, you can use this metric to analyze the load of the Redis process itself.
+
+CacheHits: The number of successful read-only key lookups in the main dictionary.
+
+CacheMisses: The number of unsuccessful read-only key lookups in the main dictionary.
+
+CacheHitRate: CacheHits / (CacheHits + CacheMisses). A low hit rate might indicate that your application is requesting data that is not in the cache.
+
+BytesUsedForCache: The total number of bytes allocated by Redis for all purposes including the dataset, buffers, and so on.
+
+ReplicationLag: How far behind (in seconds) the replica is in applying changes from the primary node. Applicable only for read replicas.
+
+Evictions: The number of keys that have been evicted due to the maxmemory limit.
+
+Which Metrics Should I Monitor?
+
+For most workloads, you should set alarms on:
+- CPUUtilization or EngineCPUUtilization exceeding 90%
+- SwapUsage exceeding 50 MB
+- Evictions increasing (indicates memory pressure)
+- CurrConnections approaching maximum connection limits
+- ReplicationLag increasing (for replicated configurations)

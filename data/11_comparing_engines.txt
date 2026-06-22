@@ -1,0 +1,41 @@
+Comparing node-based Valkey, Memcached, and Redis OSS clusters
+
+Amazon ElastiCache supports the Valkey, Memcached, and Redis OSS cache engines. Each engine provides some advantages.
+
+After you create a cache, node-based cluster or replication group, you can upgrade to a newer engine version, but you cannot downgrade to an older engine version. If you want to use an older engine version, you must delete the existing cache, node-based cluster or replication group and create it again with the earlier engine version.
+
+Choose Memcached if the following apply for you:
+- You need the simplest model possible.
+- You need to run large nodes with multiple cores or threads.
+- You need the ability to scale out and in, adding and removing nodes as demand on your system increases and decreases.
+- You need to cache objects.
+
+Choose Valkey or Redis OSS if the following apply for you:
+- You want high availability with replication
+- You need automatic failover
+- You need backup and restore capabilities
+- You need pub/sub capabilities
+- You need sorted sets or geospatial indexing
+- You want data tiering (version 6.2 and later)
+- You want vector search (Valkey 8.2 and later)
+- You want full-text search and hybrid search (Valkey 9.0 and later)
+- You want durability via Multi-AZ transactional log (Valkey 9.0 and later)
+
+Key comparison:
+
+Data partitioning: Memcached yes, Redis cluster mode disabled no, Redis cluster mode enabled yes.
+Online resharding: Memcached no, Redis cluster mode enabled yes (version 3.2.10+).
+Encryption: Memcached in-transit 1.6.12+, Redis 4.0.10+.
+Multi-threaded: Memcached yes, Redis no.
+High availability (replication): Memcached no, Redis yes.
+Automatic failover: Memcached no, Redis cluster mode disabled optional, Redis cluster mode enabled required.
+Backup and restore: Memcached serverless only, Redis yes.
+Sorted sets: Memcached no, Redis yes.
+Pub/Sub: Memcached no, Redis yes.
+Geospatial indexing: Memcached no, Redis yes.
+
+Valkey-specific features by version:
+- Valkey 8.0: 20% better memory efficiency through embedded keys, per-slot metrics, dual-channel replication, async I/O threading.
+- Valkey 8.1: New memory-efficient hash table reducing overhead by up to 20%, native Bloom filter support, 514% higher throughput for BITCOUNT.
+- Valkey 8.2: Native vector search with microsecond latency and 95%+ recall rate.
+- Valkey 9.0: Full-text search, aggregations, hybrid search, hash field expiration, multi-database support in cluster mode, polygon-based geospatial queries, up to 40% higher throughput with pipelining, atomic slot migration, durability via Multi-AZ transactional log.

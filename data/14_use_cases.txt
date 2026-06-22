@@ -1,0 +1,58 @@
+Common ElastiCache Use Cases and How ElastiCache Can Help
+
+Whether serving the latest news, a top-10 leaderboard, a product catalog, or selling tickets to an event, speed is the name of the game. The success of your website and business is greatly affected by the speed at which you deliver content.
+
+Users can register a 250-millisecond (1/4 second) difference between competing sites. Tests done at Amazon revealed that for every 100-ms (1/10 second) increase in load time, sales decrease 1 percent.
+
+In-Memory Data Store
+
+The primary purpose of an in-memory key-value store is to provide ultrafast (submillisecond latency) and inexpensive access to copies of data. Most data stores have areas of data that are frequently accessed but seldom updated. Additionally, querying a database is always slower and more expensive than locating a key in a key-value pair cache. Some database queries are especially expensive to perform, such as queries that involve joins across multiple tables or queries with intensive calculations. By caching such query results, you pay the price of the query only once.
+
+What Should I Cache?
+
+Speed and expense: It's always slower and more expensive to get data from a database than from a cache. Queries that perform joins on multiple tables are much slower and more expensive than simple queries.
+
+Data and access pattern: It doesn't make sense to cache data that changes quickly or is seldom accessed. For caching to provide a real benefit, the data should be relatively static and frequently accessed.
+
+Staleness: By definition, cached data is stale data. Determine your application's tolerance for stale data.
+
+Consider caching your data if:
+- Your data is slow or expensive to get when compared to cache retrieval.
+- Users access your data often.
+- Your data stays relatively the same, or if it changes quickly staleness is not a large issue.
+
+Gaming Leaderboards (Sorted Sets)
+
+With Valkey or Redis OSS sorted sets you can move the computational complexity of leaderboards from your application to your cluster. Sorted sets guarantee both uniqueness and element ordering. Each time a new element is added to the sorted set it's reranked in real time.
+
+Example:
+ZADD leaderboard 132 Robert
+ZADD leaderboard 231 Sandra
+ZADD leaderboard 32 June
+ZADD leaderboard 381 Adam
+
+ZREVRANGEBYSCORE leaderboard +inf -inf
+1) Adam (381)
+2) Sandra (231)
+3) Robert (132)
+4) June (32)
+
+Messaging (Pub/Sub)
+
+In the pub/sub paradigm, you send a message to a specific channel not knowing who receives it. The people who get the message are those who are subscribed to the channel. Pub/sub functionality has no relation to any key space and doesn't interfere on any level.
+
+Recommendation Data (Hashes)
+
+Using INCR or DECR in Valkey or Redis OSS makes compiling recommendations simple. Each time a user "likes" a product, you increment a counter. Using hashes, you can also maintain a list of everyone who has liked or disliked a product.
+
+Semantic caching for generative AI applications
+
+You can use ElastiCache for semantic caching in generative AI applications, reducing the cost and latency of LLM inference calls. With semantic caching, you can return a cached response by using vector-based matching to find similarities between current and prior prompts. If a user's prompt is semantically similar to a prior prompt, a cached response will be returned instead of making a new LLM inference call.
+
+Retrieval augmented generation (RAG)
+
+RAG is the process of providing LLMs with up-to-date information in the prompt to improve the relevance of responses. RAG reduces hallucinations and improves factual accuracy by grounding outputs with real-world data sources. RAG applications use vector search to retrieve semantically relevant content from a knowledge base.
+
+Durability for system-of-record workloads
+
+If you enable durability and choose synchronous writes, you can use ElastiCache for use cases beyond caching where data loss is not acceptable. Examples include knowledge bases for RAG applications, AI agent memory, AI agent workflow state, payment tokenization, streaming metadata, and real-time inventory management.

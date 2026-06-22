@@ -1,0 +1,39 @@
+At-Rest Encryption in ElastiCache
+
+To help keep your data secure, Amazon ElastiCache and Amazon S3 provide different ways to restrict access to data in your cache.
+
+ElastiCache at-rest encryption is a feature to increase data security by encrypting on-disk data. It is always enabled on a serverless cache and on clusters with durability enabled. When enabled, it encrypts the following aspects:
+- Disk during sync, backup and swap operations
+- Backups stored in Amazon S3
+- Multi-AZ transactional durability logs (for clusters with durability enabled)
+
+Data stored on SSDs (solid-state drives) in data tiering enabled clusters is always encrypted.
+
+ElastiCache offers default (service managed) encryption at rest, as well as ability to use your own symmetric customer managed AWS KMS keys in AWS Key Management Service (KMS).
+
+At-Rest Encryption Conditions
+
+- At-rest encryption is supported on replication groups running Valkey 7.2 and later, and Redis OSS versions 4.0.10 or later.
+- At-rest encryption is supported only for replication groups running in an Amazon VPC.
+- At-rest encryption is only supported for replication groups running the following node types: R7g, R6gd, R6g, R5, R4, R3, M7g, M6g, M5, M4, M3, T4g, T3, T2, C7gn.
+- You can enable at-rest encryption on a replication group only when creating the replication group. You cannot toggle at-rest encryption on and off by modifying a replication group.
+- If a cluster is using a node type from the r6gd family, data stored on SSD is encrypted whether at-rest encryption is enabled or not.
+
+Using customer managed keys from AWS KMS
+
+ElastiCache supports symmetric customer managed AWS KMS keys for encryption at rest. Customer-managed KMS keys are encryption keys that you create, own and manage in your AWS account.
+
+Important considerations:
+- If you delete the key or disable the key and revoke grants for the key that you used to encrypt a cache, the cache becomes irrecoverable.
+- Automatic key rotation preserves the properties of your AWS KMS root keys, so the rotation has no effect on your ability to access your ElastiCache data.
+- Encrypting an ElastiCache cache using KMS key requires one grant per cache. This grant is used throughout the lifespan of the cache.
+
+Enabling At-Rest Encryption
+
+All serverless caches have at-rest encryption enabled. When creating a node-based cluster, you can enable at-rest encryption by setting the parameter AtRestEncryptionEnabled to true. You can't enable at-rest encryption on existing replication groups.
+
+To enable at-rest encryption on an existing replication group:
+1. Create a manual backup of your existing replication group.
+2. Create a new replication group by restoring from the backup. On the new replication group, enable at-rest encryption.
+3. Update the endpoints in your application to point to the new replication group.
+4. Delete the old replication group.

@@ -1,0 +1,38 @@
+Minimizing downtime in ElastiCache by using Multi-AZ with Valkey and Redis OSS
+
+There are a number of instances where ElastiCache for Valkey and Redis OSS may need to replace a primary node; these include certain types of planned maintenance and the unlikely event of a primary node or Availability Zone failure.
+
+This replacement results in some downtime for the cluster, but if Multi-AZ is enabled, the downtime is minimized. The role of primary node will automatically fail over to one of the read replicas. There is no need to create and provision a new primary node, because ElastiCache will handle this transparently. This failover and replica promotion ensure that you can resume writing to the new primary as soon as promotion is complete.
+
+ElastiCache also propagates the Domain Name Service (DNS) name of the promoted replica. If your application is writing to the primary endpoint, no endpoint change is required in your application. If you are reading from individual endpoints, make sure that you change the read endpoint of the replica promoted to primary to the new replica's endpoint.
+
+Enabling Multi-AZ
+
+You can enable Multi-AZ when you create or modify a cluster using the ElastiCache console, AWS CLI, or the ElastiCache API. You can enable Multi-AZ only on Valkey or Redis OSS (cluster mode disabled) clusters that have at least one available read replica.
+
+Multi-AZ is enabled by default on Valkey or Redis OSS (cluster mode enabled) clusters. ElastiCache will automatically enable Multi-AZ only if the cluster contains at least one replica in a different Availability Zone from the primary in all shards.
+
+Failure scenarios when only the primary node fails
+
+If only the primary node fails, the read replica with the least replication lag is promoted to primary. A replacement read replica is then created and provisioned in the same Availability Zone as the failed primary.
+
+1. The failed primary node is taken offline.
+2. The read replica with the least replication lag is promoted to primary. Writes can resume as soon as the promotion process is complete, typically just a few seconds.
+3. A replacement read replica is launched and provisioned in the Availability Zone that the failed primary node was in.
+4. The replicas sync with the new primary node.
+
+Failure scenarios when the primary node and some read replicas fail
+
+If the primary and at least one read replica fails, the available replica with the least replication lag is promoted to primary cluster. New read replicas are also created and provisioned in the same Availability Zones as the failed nodes.
+
+Failure scenarios when the entire cluster fails
+
+If everything fails, all the nodes are recreated and provisioned in the same Availability Zones as the original nodes. In this scenario, all the data in the cluster is lost due to the failure of every node in the cluster. This occurrence is rare.
+
+Limitations on Multi-AZ
+
+- Multi-AZ is supported on Valkey, and on Redis OSS version 2.8.6 and later.
+- Multi-AZ isn't supported on T1 node types.
+- Valkey and Redis OSS replication is asynchronous. Therefore, when a primary node fails over to a replica, a small amount of data might be lost due to replication lag.
+- ElastiCache for Redis OSS Multi-AZ and append-only file (AOF) are mutually exclusive. If you enable one, you can't enable the other.
+- A customer-initiated reboot of a primary doesn't trigger automatic failover. Other reboots and failures do trigger automatic failover.

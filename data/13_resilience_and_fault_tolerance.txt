@@ -1,0 +1,50 @@
+Resilience in Amazon ElastiCache
+
+The AWS global infrastructure is built around AWS Regions and Availability Zones. AWS Regions provide multiple physically separated and isolated Availability Zones, which are connected with low-latency, high-throughput, and highly redundant networking. With Availability Zones, you can design and operate applications and databases that automatically fail over between Availability Zones without interruption.
+
+Mitigating Failures
+
+When planning your Amazon ElastiCache implementation, you should plan so that failures have a minimal impact upon your application and data.
+
+Mitigating Failures when Running Memcached
+
+Mitigating Node Failures: Serverless caches automatically mitigate node failures with a replicated Multi-AZ architecture so that node failures are transparent to your application. To mitigate the impact of a node failure in a node-based cluster, spread your cached data over more nodes. Because node-based clusters do not support replication, a node failure will always result in some data loss from your cluster.
+
+When you create your Memcached cluster you can create it with 1 to 60 nodes. Partitioning your data across a greater number of nodes means you'll lose less data if a node fails. For example, if you partition your data across 10 nodes, any single node stores approximately 10% of your cached data. In this case, a node failure loses approximately 10% of your cache.
+
+Mitigating Availability Zone Failures: Serverless caches automatically mitigate availability zone failures. To mitigate the impact of an Availability Zone failure in a node-based cluster, locate your nodes in as many Availability Zones as possible.
+
+Mitigating Failures when Running Valkey or Redis OSS
+
+A Valkey or Redis OSS replication group is comprised of a single primary node which your application can both read from and write to, and from 1 to 5 read-only replica nodes. Whenever data is written to the primary node it is also asynchronously updated on the read replica nodes.
+
+When a read replica fails:
+1. ElastiCache detects the failed read replica.
+2. ElastiCache takes the failed node off line.
+3. ElastiCache launches and provisions a replacement node in the same AZ.
+4. The new node synchronizes with the primary node.
+
+When Multi-AZ is enabled and primary fails:
+1. ElastiCache detects the primary node failure.
+2. ElastiCache promotes the read replica node with the least replication lag to primary node.
+3. The other replicas sync with the new primary node.
+4. ElastiCache spins up a read replica in the failed primary's AZ.
+5. The new node syncs with the newly promoted primary.
+
+Failing over to a replica node is generally faster than creating and provisioning a new primary node.
+
+When Multi-AZ is disabled and primary fails:
+1. ElastiCache detects primary failure.
+2. ElastiCache takes the primary offline.
+3. ElastiCache creates and provisions a new primary node to replace the failed primary.
+4. ElastiCache syncs the new primary with one of the existing replicas.
+5. When the sync is finished, the new node functions as the cluster's primary node.
+
+During this process, your application can't write to the primary node but can continue reading from replica nodes.
+
+Recommendations
+
+- Create serverless caches over node-based clusters for automatic fault tolerance.
+- For node-based clusters, use multiple nodes in each shard distributed across multiple Availability Zones.
+- Enable Multi-AZ on replication groups for automatic failover.
+- Schedule regular backups of your cluster.
