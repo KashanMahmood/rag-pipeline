@@ -36,7 +36,8 @@ def search(query):
         print(f"Source: {chunk[1]}, Similarity Score: {chunk[2]}\n")
         print(f"Text Snipet: {chunk[0][:100]}\n")
 
-search("What is a Replica Node")
+    return relevant_chunks
+
 
 
 
